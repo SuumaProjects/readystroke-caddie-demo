@@ -46,20 +46,20 @@
     const en = /^en\b/i.test(navigator.language || '');
     const copy = en ? {
       welcome:'How can I help you?',
-      description:`Ask about the local rules at ${CONFIG.clubName}. This test uses the May 2026 document.`,
-      examples:['Where can I drop near the 1st green?','What happens between holes 7 and 18?','How long may I take for 18 holes?'],
-      placeholder:'Ask about the local rules…', send:'Send question',
-      note:'PILOT · Local rules, May 2026. Answers refer to the approved document.',
-      demo:'The rules service is not connected yet.',
-      loading:'Checking the local rules…', error:'I could not check the rules just now. Please try again.'
+      description:`Ask about the local rules and points based conduct programme at ${CONFIG.clubName}.`,
+      examples:['Where can I drop near the 1st green?','How many points for not repairing a pitch mark?','How long may I take for 18 holes?'],
+      placeholder:'Ask about the club…', send:'Send question',
+      note:'PILOT · Local rules (May 2026) and club points programme (version 3).',
+      demo:'The Caddie service is not connected yet.',
+      loading:'Checking the club documents…', error:'I could not check the documents just now. Please try again.'
     } : {
       welcome:'¿En qué puedo ayudarte?',
-      description:`Pregunta por las reglas locales de ${CONFIG.clubName}. Esta prueba utiliza el documento de mayo de 2026.`,
-      examples:['¿Dónde puedo dropar cerca del green del 1?','¿Qué ocurre entre los hoyos 7 y 18?','¿Cuánto tiempo tengo para jugar 18 hoyos?'],
-      placeholder:'Pregunta por las reglas locales…', send:'Enviar pregunta',
-      note:'PILOTO · Reglas locales de mayo de 2026. Respuestas basadas en el documento aprobado.',
-      demo:'El servicio de reglas todavía no está conectado.',
-      loading:'Consultando las reglas locales…', error:'No he podido consultar las reglas ahora. Inténtalo de nuevo.'
+      description:`Pregunta por las reglas locales y el carné por puntos de ${CONFIG.clubName}.`,
+      examples:['¿Dónde puedo dropar cerca del green del 1?','¿Cuántos puntos pierdo si no arreglo un pique?','¿Cuánto tiempo tengo para jugar 18 hoyos?'],
+      placeholder:'Pregunta por el club…', send:'Enviar pregunta',
+      note:'PILOTO · Reglas locales (mayo de 2026) y carné por puntos (versión 3).',
+      demo:'El servicio Caddie todavía no está conectado.',
+      loading:'Consultando los documentos del club…', error:'No he podido consultar los documentos ahora. Inténtalo de nuevo.'
     };
     document.documentElement.lang = en ? 'en-GB' : 'es';
     document.getElementById('welcome').textContent = copy.welcome;
