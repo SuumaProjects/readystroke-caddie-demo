@@ -18,6 +18,7 @@
     .bubble{max-width:min(88%,560px);padding:12px 15px;border-radius:17px;margin:10px 0;font-size:14px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
     .bubble.user{margin-left:auto;color:#fff;background:#164b3f;border-bottom-right-radius:5px}
     .bubble.assistant{background:#fff;border:1px solid #dce7df;border-bottom-left-radius:5px}
+    .bubble.assistant a{color:#145744;text-decoration:underline;text-underline-offset:2px}
     .demo-note{background:#fff9e8;border-top:1px solid #eedfaa;padding:7px 16px;font-size:11px;line-height:1.35;color:#654c19;text-align:center}
     form{display:flex;align-items:end;gap:9px;background:#fff;padding:12px 14px calc(12px + env(safe-area-inset-bottom));border-top:1px solid #e1e8e2}
     input{flex:1;min-width:0;border:1px solid #bccdc3;border-radius:22px;padding:12px 15px;background:#fff;color:#162b26;font-size:16px;outline:0}
@@ -46,18 +47,18 @@
     const en = /^en\b/i.test(navigator.language || '');
     const copy = en ? {
       welcome:'How can I help you?',
-      description:`Ask about the local rules and points based conduct programme at ${CONFIG.clubName}.`,
-      examples:['Where can I drop near the 1st green?','How many points for not repairing a pitch mark?','How long may I take for 18 holes?'],
+      description:`Ask about the local rules, points based conduct programme and 2026 tariffs at ${CONFIG.clubName}.`,
+      examples:['Where can I drop near the 1st green?','How many points for not repairing a pitch mark?','How much is an 18-hole green fee on a weekday?'],
       placeholder:'Ask about the club…', send:'Send question',
-      note:'PILOT · Local rules (May 2026) and club points programme (version 3).',
+      note:'PILOT · Local rules (May 2026), club points programme (version 3) and 2026 tariffs.',
       demo:'The Caddie service is not connected yet.',
       loading:'Checking the club documents…', error:'I could not check the documents just now. Please try again.'
     } : {
       welcome:'¿En qué puedo ayudarte?',
-      description:`Pregunta por las reglas locales y el carné por puntos de ${CONFIG.clubName}.`,
-      examples:['¿Dónde puedo dropar cerca del green del 1?','¿Cuántos puntos pierdo si no arreglo un pique?','¿Cuánto tiempo tengo para jugar 18 hoyos?'],
+      description:`Pregunta por las reglas locales, el carné por puntos y las tarifas 2026 de ${CONFIG.clubName}.`,
+      examples:['¿Dónde puedo dropar cerca del green del 1?','¿Cuántos puntos pierdo si no arreglo un pique?','¿Cuánto cuesta jugar 18 hoyos un día laborable?'],
       placeholder:'Pregunta por el club…', send:'Enviar pregunta',
-      note:'PILOTO · Reglas locales (mayo de 2026) y carné por puntos (versión 3).',
+      note:'PILOTO · Reglas locales (mayo de 2026), carné por puntos (versión 3) y tarifas 2026.',
       demo:'El servicio Caddie todavía no está conectado.',
       loading:'Consultando los documentos del club…', error:'No he podido consultar los documentos ahora. Inténtalo de nuevo.'
     };
@@ -97,6 +98,14 @@
         const result = await response.json();
         if (typeof result.answer !== 'string') throw new Error('Invalid answer');
         pending.textContent = result.answer + (result.source ? (en ? '\n\nSource: ' : '\n\nFuente: ') + result.source : '');
+        if (result.source_url === 'https://meaztegigolf.eus/tarifas/') {
+          const link = document.createElement('a');
+          link.href = result.source_url;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.textContent = en ? 'View current tariffs on the club website' : 'Consultar las tarifas vigentes en la web del club';
+          pending.append(document.createTextNode('\n'), link);
+        }
       } catch { pending.textContent = copy.error; }
       finally { send.disabled = false; input.disabled = false; log.scrollTop = log.scrollHeight; }
     }

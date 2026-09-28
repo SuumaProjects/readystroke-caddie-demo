@@ -1,11 +1,11 @@
-ReadyStroke Caddie — ampliación Carné por puntos (Meaztegi)
+ReadyStroke Caddie — tercera fuente: tarifas 2026 de Meaztegi Golf
+Fuente oficial: https://meaztegigolf.eus/tarifas/
+Cuadro de precios 2026: https://meaztegigolf.eus/wp-content/uploads/2026/01/tarifas-2026-meaztegi.pdf
 
-Los archivos src/worker.js y src/carnet.js van dentro de la carpeta existente caddie-reglas-meaztegi. El archivo src/rules.js existente permanece en esa misma carpeta. El index.html incluido reemplaza el índice del repositorio GitHub Pages readystroke-caddie-demo. No se incluyen claves.
-
-En Terminal, dentro de caddie-reglas-meaztegi, con el ZIP situado en su carpeta superior:
-unzip -o "../ReadyStroke_Caddie_Carne_Puntos_v1.zip"
+Colocar este ZIP en la carpeta superior a caddie-reglas-meaztegi. En Terminal, dentro de caddie-reglas-meaztegi:
+unzip -o "../ReadyStroke_Caddie_Tarifas_Meaztegi_2026_v1.zip"
 npx wrangler deploy
 
-Después subir el index.html extraído a la raíz del repositorio SuumaProjects/readystroke-caddie-demo. Esperar a que termine GitHub Pages y actualizar la app.
+Después reemplazar index.html en la raíz del repositorio SuumaProjects/readystroke-caddie-demo por el index.html extraído y confirmar los cambios. El archivo src/rules.js ya existente permanece sin modificaciones. Nunca introducir la clave OpenAI en GitHub.
 
-Pruebas: ¿Cuántos puntos pierdo si no arreglo un pique? (3 puntos del carné); ¿Puedo jugar con bolas de prácticas? (6 puntos del carné); ¿Cuántos puntos tengo yo? (sin acceso a datos personales); ¿La zona de dropaje del hoyo 11 es sin penalización? (el documento de reglas locales no lo especifica).
+Comprobación: ¿Cuánto cuesta jugar 18 hoyos un día laborable si no soy abonado? Debe citar 60 € en la tabla 2026 y ofrecer enlace oficial. Comprobar también una pregunta sobre el carné y otra sobre reglas locales. Esta edición es una transcripción fechada; actualizar src/tarifas.js cuando cambie el cuadro oficial.
