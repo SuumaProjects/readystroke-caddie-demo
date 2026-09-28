@@ -9,7 +9,8 @@
     :root{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#162b26;background:#f6f8f6;font-synthesis:none}
     *{box-sizing:border-box} html,body{height:100%;margin:0} button,input{font:inherit}
     .app{display:flex;flex-direction:column;min-height:540px;height:100vh;height:100dvh;max-width:780px;margin:auto;background:#f8faf8;box-shadow:0 0 24px #09261b0d}
-    .messages{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:22px 16px 20px}
+    .messages{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:22px 16px 20px;scrollbar-width:none;-ms-overflow-style:none}
+    .messages::-webkit-scrollbar{display:none}
     .intro{max-width:520px;margin:34px auto 28px;text-align:center}.intro .mark{height:104px;margin-bottom:12px}.intro .mark img{width:63px;height:104px;object-fit:contain}.intro .brand{font-size:15px;font-weight:750;letter-spacing:.03em;color:#174439;margin:0 0 12px}.intro h2{font-size:23px;line-height:1.18;margin:0 0 9px}.intro p{font-size:14px;line-height:1.5;color:#51645c;margin:0}
     .examples{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:22px auto 0;max-width:540px}
     .example{border:1px solid #b9cec5;border-radius:18px;background:#fff;color:#164739;padding:9px 12px;min-height:42px;cursor:pointer;font-size:13px;line-height:1.3;text-align:left}
