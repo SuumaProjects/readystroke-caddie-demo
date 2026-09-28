@@ -35,8 +35,8 @@
   </main>
   <script>
   (() => {
-    // Cambiar estos dos valores para adaptar Caddie a otro club.
-    const CONFIG = {clubName: 'Meaztegi Golf', clubLogoUrl: ''};
+    // Al activar el servicio, pegar aquí la URL pública del Worker terminada en /ask.
+    const CONFIG = {clubName: 'Meaztegi Golf', clubLogoUrl: '', apiUrl: 'https://rs-caddie-meaztegi-test.bepenak.workers.dev/ask'};
     const logo = document.getElementById('club-logo');
     if (CONFIG.clubLogoUrl) {
       const fallback = logo.src;
@@ -46,28 +46,69 @@
     const en = /^en\b/i.test(navigator.language || '');
     const copy = en ? {
       welcome:'How can I help you?',
-      description:`Ask about a hole, the greens, local rules or services at ${CONFIG.clubName}.`,
-      examples:['How should I play this hole?','What are the local rules?','What is happening at the club?'],
-      placeholder:'Write your question…', send:'Send question', note:'DEMO · Answers are not yet connected to approved club information.',
-      reply:'I cannot answer with verified club information yet. ReadyStroke Caddie is being tested.'
+      description:`Ask about the local rules at ${CONFIG.clubName}. This test uses the May 2026 document.`,
+      examples:['Where can I drop near the 1st green?','What happens between holes 7 and 18?','How long may I take for 18 holes?'],
+      placeholder:'Ask about the local rules…', send:'Send question',
+      note:'PILOT · Local rules, May 2026. Answers refer to the approved document.',
+      demo:'The rules service is not connected yet.',
+      loading:'Checking the local rules…', error:'I could not check the rules just now. Please try again.'
     } : {
       welcome:'¿En qué puedo ayudarte?',
-      description:`Pregunta por un hoyo, los greens, las reglas locales o los servicios de ${CONFIG.clubName}.`,
-      examples:['¿Cómo juego este hoyo?','¿Cuáles son las reglas locales?','¿Qué ocurre en el club?'],
-      placeholder:'Escribe tu pregunta…', send:'Enviar pregunta', note:'DEMOSTRACIÓN · Las respuestas aún no están conectadas al contenido aprobado del club.',
-      reply:'Todavía no puedo responder con información verificada del club. ReadyStroke Caddie está en pruebas.'
+      description:`Pregunta por las reglas locales de ${CONFIG.clubName}. Esta prueba utiliza el documento de mayo de 2026.`,
+      examples:['¿Dónde puedo dropar cerca del green del 1?','¿Qué ocurre entre los hoyos 7 y 18?','¿Cuánto tiempo tengo para jugar 18 hoyos?'],
+      placeholder:'Pregunta por las reglas locales…', send:'Enviar pregunta',
+      note:'PILOTO · Reglas locales de mayo de 2026. Respuestas basadas en el documento aprobado.',
+      demo:'El servicio de reglas todavía no está conectado.',
+      loading:'Consultando las reglas locales…', error:'No he podido consultar las reglas ahora. Inténtalo de nuevo.'
     };
     document.documentElement.lang = en ? 'en-GB' : 'es';
-    document.getElementById('welcome').textContent=copy.welcome;
-    document.getElementById('description').textContent=copy.description;
-    document.getElementById('demo-note').textContent=copy.note;
-    const input=document.getElementById('question'); input.placeholder=copy.placeholder;
-    document.querySelector('.send').setAttribute('aria-label',copy.send);
-    const log=document.getElementById('messages');
-    function addBubble(value,role){const node=document.createElement('div');node.className='bubble '+role;node.textContent=value;log.appendChild(node);log.scrollTop=log.scrollHeight;}
-    function submit(value){const question=value.trim();if(!question)return;document.getElementById('intro').hidden=true;addBubble(question,'user');addBubble(copy.reply,'assistant');input.value='';input.focus();}
-    document.getElementById('composer').addEventListener('submit',event=>{event.preventDefault();submit(input.value)});
-    const examples=document.getElementById('examples');copy.examples.forEach(label=>{const button=document.createElement('button');button.type='button';button.className='example';button.textContent=label;button.addEventListener('click',()=>submit(label));examples.appendChild(button)});
+    document.getElementById('welcome').textContent = copy.welcome;
+    document.getElementById('description').textContent = copy.description;
+    document.getElementById('demo-note').textContent = CONFIG.apiUrl ? copy.note : (en ? 'DEMO · ' : 'DEMOSTRACIÓN · ') + copy.demo;
+    const input = document.getElementById('question');
+    input.placeholder = copy.placeholder;
+    const send = document.querySelector('.send');
+    send.setAttribute('aria-label', copy.send);
+    const log = document.getElementById('messages');
+    function addBubble(value, role) {
+      const node = document.createElement('div');
+      node.className = 'bubble ' + role;
+      node.textContent = value;
+      log.appendChild(node);
+      log.scrollTop = log.scrollHeight;
+      return node;
+    }
+    async function submit(value) {
+      const question = value.trim();
+      if (!question || send.disabled) return;
+      document.getElementById('intro').hidden = true;
+      addBubble(question, 'user');
+      input.value = '';
+      if (!CONFIG.apiUrl) { addBubble(copy.demo, 'assistant'); return; }
+      send.disabled = true;
+      input.disabled = true;
+      const pending = addBubble(copy.loading, 'assistant');
+      try {
+        const response = await fetch(CONFIG.apiUrl, {
+          method: 'POST', headers: {'content-type': 'application/json'},
+          body: JSON.stringify({question, language: navigator.language}),
+        });
+        if (!response.ok) throw new Error('Service unavailable');
+        const result = await response.json();
+        if (typeof result.answer !== 'string') throw new Error('Invalid answer');
+        pending.textContent = result.answer + (result.source ? (en ? '\n\nSource: ' : '\n\nFuente: ') + result.source : '');
+      } catch { pending.textContent = copy.error; }
+      finally { send.disabled = false; input.disabled = false; log.scrollTop = log.scrollHeight; }
+    }
+    document.getElementById('composer').addEventListener('submit', (event) => {
+      event.preventDefault(); submit(input.value);
+    });
+    const examples = document.getElementById('examples');
+    copy.examples.forEach((label) => {
+      const button = document.createElement('button');
+      button.type = 'button'; button.className = 'example'; button.textContent = label;
+      button.addEventListener('click', () => submit(label)); examples.appendChild(button);
+    });
   })();
   </script>
 </body>
