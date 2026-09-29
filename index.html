@@ -15,7 +15,7 @@
     .examples{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:22px auto 0;max-width:540px}
     .example{border:1px solid #b9cec5;border-radius:18px;background:#fff;color:#164739;padding:9px 12px;min-height:42px;cursor:pointer;font-size:13px;line-height:1.3;text-align:left}.example.featured{background:#e7f4ec;border:2px solid #478e65;font-weight:700;flex-basis:100%;max-width:360px;text-align:center}
     .example:hover,.example:focus-visible{border-color:#29705a;background:#edf6f1}.example:focus-visible,.send:focus-visible,input:focus-visible{outline:3px solid #72b797;outline-offset:2px}
-    .calculator{margin:12px auto;padding:16px;border:1px solid #d3e4d9;border-radius:16px;background:#fff;max-width:560px}.calculator[hidden]{display:none}.calculator form{display:block;padding:0;border:0}.calculator h2{font-size:17px;margin:0 0 6px}.calculator p{font-size:12px;color:#51645c;line-height:1.4;margin:0 0 12px}.calc-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.calc-fields label{font-size:12px;font-weight:650;display:grid;gap:4px}.calc-fields input,.calc-fields select{width:100%;min-width:0;border:1px solid #bccdc3;border-radius:8px;padding:8px;background:#fff;color:#162b26;font-size:15px}.calc-action{margin-top:10px;border:0;border-radius:9px;background:#164b3f;color:#fff;padding:9px 14px;font-weight:650}.calc-result{margin:12px 0 0!important;font-size:14px!important;color:#162b26!important}.calc-result:empty{display:none}
+    .calculator{margin:12px auto;padding:16px;border:1px solid #d3e4d9;border-radius:16px;background:#fff;max-width:560px}.calculator[hidden]{display:none}.calculator form{display:block;padding:0;border:0}.calculator h2{font-size:17px;margin:0 0 6px}.calculator p{font-size:12px;color:#51645c;line-height:1.4;margin:0 0 12px}.calc-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.calc-fields label{font-size:12px;font-weight:650;display:grid;gap:4px}.calc-fields input,.calc-fields select{width:100%;min-width:0;border:1px solid #bccdc3;border-radius:8px;padding:8px;background:#fff;color:#162b26;font-size:15px}.calc-action{margin-top:10px;border:0;border-radius:9px;background:#164b3f;color:#fff;padding:9px 14px;font-weight:650}.calc-result{margin:12px 0 0!important;font-size:14px!important;color:#162b26!important}.calc-result:empty{display:none}
     .bubble{max-width:min(88%,560px);padding:12px 15px;border-radius:17px;margin:10px 0;font-size:14px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
     .bubble.user{margin-left:auto;color:#fff;background:#164b3f;border-bottom-right-radius:5px}
     .bubble.assistant{background:#fff;border:1px solid #dce7df;border-bottom-left-radius:5px}
@@ -38,6 +38,7 @@
           <label><span id="calc-index-label"></span><input id="calc-index" type="text" inputmode="decimal" placeholder="20,0" required></label>
           <label><span id="calc-tee-label"></span><select id="calc-tee"><option>62</option><option>60</option><option>56</option><option>52</option></select></label>
           <label><span id="calc-rating-label"></span><select id="calc-rating"><option value="m"></option><option value="f"></option></select></label>
+          <label><span id="calc-format-label"></span><select id="calc-format"><option value="free"></option><option value="stableford"></option><option value="medal"></option><option value="fourball"></option><option value="match"></option></select></label>
         </div>
         <button class="calc-action" id="calc-button" type="submit"></button>
         <p class="calc-result" id="calc-result" role="status" aria-live="polite"></p>
@@ -57,7 +58,7 @@
       logo.onerror = () => { logo.onerror = null; logo.src = fallback; };
       logo.src = CONFIG.clubLogoUrl;
     }
-    const en = /^en\b/i.test(navigator.language || '');
+    const en = !/^es(?:-|$)/i.test(navigator.language || '');
     const copy = en ? {
       welcome:'How can I help you?',
       description:`Ask about the local rules, points based conduct programme and 2026 tariffs at ${CONFIG.clubName}.`,
@@ -83,24 +84,31 @@
       '56': {m:{slope:134,course:70.5},f:{slope:133,course:76.9}},
       '52': {m:{slope:124,course:69.0},f:{slope:134,course:74.3}},
     };
+    // Apéndice C del Sistema Mundial de Hándicaps: porcentajes recomendados.
+    // El comité de cada competición puede establecer otro porcentaje.
+    const FORMATS = {free:1, stableford:.95, medal:.95, fourball:.85, match:1};
     const calc = document.getElementById('handicap-calculator');
     const labels = en ? {
-      title:'Course handicap · 18 holes', description:'Enter your Handicap Index and tees. Competition Playing Handicap may differ.',
-      index:'Handicap Index', tee:'Tee', rating:'Rating', male:'Men', female:'Women', button:'Calculate',
+      title:'Playing handicap · 18 holes', description:'Enter your Handicap Index, tees and format. Competition terms take precedence.',
+      index:'Handicap Index', tee:'Tee', rating:'Rating', format:'Format', male:'Men', female:'Women', button:'Calculate',
+      formats:{free:'Casual round · 100%',stableford:'Individual Stableford · 95%',medal:'Individual Medal · 95%',fourball:'Four-Ball stroke play · 85%',match:'Singles match play · 100%'},
       invalid:'Enter a valid Handicap Index (for example 20.0).',
-      query:(index,tee,category)=>`Handicap Index ${index}, tee ${tee}, ${category} rating`,
-      result:(value,tee,category,slope,course)=>`Course handicap: ${value} strokes · tee ${tee} · ${category} rating (Slope ${slope}, Course Rating ${course.toFixed(1)}). Competition allowances may change your Playing Handicap.`
+      query:(index,tee,category,format)=>`Handicap Index ${index}, tee ${tee}, ${category} rating, ${format}`,
+      result:(playing,courseHcp,tee,category,slope,course,format,pct,match)=>`Playing handicap: ${playing} strokes (${format}, ${pct}%). Course handicap: ${courseHcp} · tee ${tee} · ${category} rating (Slope ${slope}, Course Rating ${course.toFixed(1)}). ${match ? 'Match play strokes received depend on the opponent’s handicap. ' : ''}Check the competition terms for the actual allowance.`
     } : {
-      title:'Hándicap de campo · 18 hoyos', description:'Introduce tu índice y salida. En competición puede variar el hándicap de juego.',
-      index:'Índice de hándicap', tee:'Salida', rating:'Valoración', male:'Masculina', female:'Femenina', button:'Calcular',
+      title:'Hándicap de juego · 18 hoyos', description:'Introduce índice, salida y modalidad. Prevalecen las condiciones de cada competición.',
+      index:'Índice de hándicap', tee:'Salida', rating:'Valoración', format:'Modalidad', male:'Masculina', female:'Femenina', button:'Calcular',
+      formats:{free:'Vuelta libre · 100%',stableford:'Stableford individual · 95%',medal:'Medal individual · 95%',fourball:'Mejor bola por golpes · 85%',match:'Match play individual · 100%'},
       invalid:'Introduce un índice de hándicap válido (por ejemplo 20,0).',
-      query:(index,tee,category)=>`Índice ${index}, salida ${tee}, valoración ${category.toLowerCase()}`,
-      result:(value,tee,category,slope,course)=>`Hándicap de campo: ${value} golpes · salida ${tee} · valoración ${category.toLowerCase()} (Slope ${slope}, VC ${course.toFixed(1).replace('.',',')}). En competición puede variar según la modalidad.`
+      query:(index,tee,category,format)=>`Índice ${index}, salida ${tee}, valoración ${category.toLowerCase()}, ${format}`,
+      result:(playing,courseHcp,tee,category,slope,course,format,pct,match)=>`Hándicap de juego: ${playing} golpes (${format}, ${pct}%). Hándicap de campo: ${courseHcp} · salida ${tee} · valoración ${category.toLowerCase()} (Slope ${slope}, VC ${course.toFixed(1).replace('.',',')}). ${match ? 'Los golpes recibidos en match play dependen también del hándicap del rival. ' : ''}Comprueba el porcentaje en las condiciones de la competición.`
     };
-    for (const [key,id] of [['title','calc-title'],['description','calc-description'],['index','calc-index-label'],['tee','calc-tee-label'],['rating','calc-rating-label'],['button','calc-button']])
+    for (const [key,id] of [['title','calc-title'],['description','calc-description'],['index','calc-index-label'],['tee','calc-tee-label'],['rating','calc-rating-label'],['format','calc-format-label'],['button','calc-button']])
       document.getElementById(id).textContent = labels[key];
     document.querySelector('#calc-rating [value="m"]').textContent = labels.male;
     document.querySelector('#calc-rating [value="f"]').textContent = labels.female;
+    for (const [key,label] of Object.entries(labels.formats))
+      document.querySelector(`#calc-format [value="${key}"]`).textContent = label;
     document.getElementById('calc-tee').value = '60';
     document.getElementById('calc-form').addEventListener('submit', (event) => {
       event.preventDefault();
@@ -115,11 +123,14 @@
       const category = document.getElementById('calc-rating').value;
       const {slope,course} = RATINGS[tee][category];
       const exact = index * slope / 113 + course - 72;
+      const format = document.getElementById('calc-format').value;
+      const playing = Math.floor(exact * FORMATS[format] + 0.5);
+      const courseHcp = Math.floor(exact + 0.5);
       const ratingName = category === 'm' ? labels.male : labels.female;
       document.getElementById('intro').hidden = true;
       calc.hidden = true;
-      addBubble(labels.query(raw,tee,ratingName), 'user');
-      addBubble(labels.result(Math.floor(exact + 0.5),tee,ratingName,slope,course), 'assistant');
+      addBubble(labels.query(raw,tee,ratingName,labels.formats[format]), 'user');
+      addBubble(labels.result(playing,courseHcp,tee,ratingName,slope,course,labels.formats[format],Math.round(FORMATS[format]*100),format === 'match'), 'assistant');
     });
     document.documentElement.lang = en ? 'en-GB' : 'es';
     document.getElementById('welcome').textContent = copy.welcome;
@@ -156,13 +167,13 @@
         if (!response.ok) throw new Error('Service unavailable');
         const result = await response.json();
         if (typeof result.answer !== 'string') throw new Error('Invalid answer');
-        pending.textContent = result.answer + (result.source ? (en ? '\n\nSource: ' : '\n\nFuente: ') + result.source : '');
+        pending.textContent = result.answer + (result.source ? '\n\n↗ ' + result.source : '');
         if (result.source_url === 'https://meaztegigolf.eus/tarifas/') {
           const link = document.createElement('a');
           link.href = result.source_url;
           link.target = '_blank';
           link.rel = 'noopener noreferrer';
-          link.textContent = en ? 'View current tariffs on the club website' : 'Consultar las tarifas vigentes en la web del club';
+          link.textContent = 'meaztegigolf.eus/tarifas/';
           pending.append(document.createTextNode('\n'), link);
         }
       } catch { pending.textContent = copy.error; }
