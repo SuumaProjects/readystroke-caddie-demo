@@ -196,7 +196,7 @@
       } else if (format === 'match' || format === 'fourballMatch') {
         const lowest = Math.min(...data.map(p => p.exact));
         response = data.map(p => `${p.name}: ${round((p.exact-lowest)*FORMATS[format])} ${en ? 'strokes received' : 'golpes recibidos'} (${en ? 'Course Handicap' : 'hándicap de campo'} ${p.courseHcp}; ${en ? 'tee' : 'salida'} ${p.tee})`).join('\n') +
-          (en ? `\n${Math.round(FORMATS[format]*100)}% of the difference from the lowest unrounded Course Handicap. Check the competition terms.` : `\n${Math.round(FORMATS[format]*100)} % de la diferencia respecto al menor hándicap de campo sin redondear. Comprueba las condiciones de la competición.`);
+          (en ? `\n${Math.round(FORMATS[format]*100)}% of the difference from the lowest Course Handicap. The calculation uses unrounded values; final strokes are rounded to the nearest whole number (0.5 rounds up). Check the competition terms.` : `\n${Math.round(FORMATS[format]*100)} % de la diferencia respecto al menor hándicap de campo. El cálculo utiliza valores sin redondear; los golpes finales se redondean al entero más cercano (0,5 hacia arriba). Comprueba las condiciones de la competición.`);
       } else {
         response = data.map(p => `${p.name ? p.name+': ' : ''}${en ? 'Playing handicap' : 'Hándicap de juego'} ${p.strokes} · ${en ? 'Course Handicap' : 'hándicap de campo'} ${p.courseHcp} · ${en ? 'tee' : 'salida'} ${p.tee} (${p.category === 'm' ? labels.male : labels.female})`).join('\n') +
           (en ? '\nCheck the competition terms for the actual allowance.' : '\nComprueba el porcentaje en las condiciones de la competición.');
